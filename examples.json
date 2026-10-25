@@ -1,0 +1,130 @@
+[
+  {
+    "name": "readme",
+    "title": "Basic example",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "helloworld",
+    "title": "Hello world",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "deparse_macro",
+    "title": "The @deparse macro",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "helpmode",
+    "title": "Help mode",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "pkgmode",
+    "title": "Package mode",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "shellmode",
+    "title": "Shell mode",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "tab_completion",
+    "title": "Tab completion",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "disable_color",
+    "title": "Disable color",
+    "record": true,
+    "options": [
+      "--color=no"
+    ]
+  },
+  {
+    "name": "quietmode",
+    "title": "Quiet mode",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "numbered_prompt",
+    "title": "Numbered prompts",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "interactive_menu",
+    "title": "Interactive menus: select, cancel, repeat",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "ohmyrepl",
+    "title": "OhMyREPL",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "unicodefun",
+    "title": "UnicodeFun",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "pythoncall",
+    "title": "PythonCall",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "unicodeplots",
+    "title": "UnicodePlots",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "unicodeplots_animated",
+    "title": "Animated UnicodePlots",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "imageinterminal",
+    "title": "ImageInTerminal",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "sixel",
+    "title": "Sixel",
+    "record": false,
+    "options": []
+  },
+  {
+    "name": "plots_with_sixel",
+    "title": "Plots with Sixel",
+    "record": false,
+    "options": []
+  },
+  {
+    "name": "iris",
+    "title": "Iris dataset",
+    "record": true,
+    "options": []
+  },
+  {
+    "name": "use_ghostwriter",
+    "title": "Why We Created Julia",
+    "record": true,
+    "options": []
+  }
+]

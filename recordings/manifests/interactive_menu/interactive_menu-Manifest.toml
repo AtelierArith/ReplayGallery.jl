@@ -1,0 +1,27 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.13.2"
+manifest_format = "2.1"
+project_hash = "1108a969d6d6ee8ae31a69073a6709c20f931550"
+
+[[deps.Crayons]]
+git-tree-sha1 = "54b76cbb40d9a0f5368c880725b2f141da77c94f"
+registries = "General"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.2.0"
+
+[[deps.Replay]]
+deps = ["Crayons", "Sockets"]
+git-tree-sha1 = "53b4bb7f070867da2741f7336b1909a2334e01c4"
+repo-rev = "e50fe5c421d8e649bc02a36a5e365fd930e56f90"
+repo-url = "https://github.com/AtelierArith/Replay.jl.git"
+uuid = "dd78c5bf-19c4-4e9c-96ce-c3ec745c7812"
+version = "0.5.0"
+
+[[deps.Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+version = "1.11.0"
+
+[registries.General]
+url = "https://github.com/JuliaRegistries/General.git"
+uuid = "23338594-aafe-5451-b93e-139f81909106"
