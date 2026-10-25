@@ -64,8 +64,15 @@ def run(command, *, timeout=900, cwd=ROOT, env=None, capture=False):
             proc.stdout.close()
         raise
     if proc.returncode:
-        raise subprocess.CalledProcessError(proc.returncode, command, output=output)
+        raise RuntimeError(f'Command failed with exit status {proc.returncode}: {shlex.join(map(str, command))}\n' + (output or '')[-5000:])
     return output or ''
+
+
+def julia_error(text):
+    """Return useful diagnostics even when Julia colors its ERROR prefix."""
+    plain = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
+    match = re.search(r'(?:^|[\r\n])ERROR:', plain)
+    return plain[match.start():match.start() + 5000] if match else None
 
 
 def record(name, output, julia='julia', timeout=900):
@@ -97,8 +104,8 @@ def record_example(entry, example_directory, output, julia, timeout, identity):
     env['TERM'] = 'xterm-256color'
     # Warm up separately so installation/precompilation is not in the recording.
     warmup = run(command, timeout=timeout, cwd=example_directory, env=env, capture=True)
-    if re.search(r'(?:^|[\r\n])ERROR:', warmup):
-        raise RuntimeError('Julia reported an error during warmup:\n' + warmup[-5000:])
+    if error := julia_error(warmup):
+        raise RuntimeError('Julia reported an error during warmup:\n' + error)
     # Write atomically: failed/repeated recordings must not overwrite valid output.
     with tempfile.TemporaryDirectory(prefix=name + '-', dir=output) as temporary:
         cast = Path(temporary) / (name + '.cast')
@@ -111,8 +118,8 @@ def record_example(entry, example_directory, output, julia, timeout, identity):
             raise RuntimeError('Recorded command failed or did not finish')
         text = check_cast(cast)
         plain = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
-        if re.search(r'(?:^|[\r\n])ERROR:', plain):
-            raise RuntimeError('Julia reported an error in the recording')
+        if error := julia_error(plain):
+            raise RuntimeError('Julia reported an error in the recording:\n' + error)
         if name == 'numbered_prompt' and not all(marker in plain for marker in ['In [1]:', 'In [2]:', 'Out[1]']):
             raise RuntimeError('Numbered prompt/output markers are absent')
         if name == 'interactive_menu' and not all(marker in plain for marker in ['choice = 2', 'cancelled = -1', 'again = 1']):

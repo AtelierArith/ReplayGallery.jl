@@ -73,12 +73,15 @@ See [video export](docs/video.md) for an actual GIF/MP4 file rather than a cast.
   package/artifact cache speeds installation but is never evidence of successful
   execution. Every selected example is warmed up and recorded again.
 - Each recording artifact contains a cast, a receipt with source-input checksum,
-  Julia/asciinema versions and commit, and the exact resolved root/example
+  Julia/asciinema versions and checkout commit, and the exact resolved root/example
   `Manifest.toml` files. Restore those manifests with the recorded Julia version
   and instantiate to reproduce that environment. The importer preserves verified
   manifests in `recordings/manifests/NAME/` alongside committed cast provenance,
   so reviewed recordings remain reproducible after workflow artifacts expire. Source projects without a
   manifest resolve dependencies anew on a subsequent refresh.
+- Local recording receipts may name a local-only Git commit; their source-input
+  fingerprints identify the verified contents, not a claim that the commit is
+  publicly available. CI receipts refer to the actual GitHub checkout commit.
 - No workflow writes commits or triggers recursive recording builds. Artifacts
   expire according to repository retention. Review and import a result with
   `python scripts/import_recording.py NAME ARTIFACT_DIRECTORY`, then submit a PR.

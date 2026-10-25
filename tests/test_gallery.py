@@ -165,3 +165,13 @@ class IsolationTests(unittest.TestCase):
             value = heartbeat.read_text()
             time.sleep(0.1)
             self.assertEqual(value, heartbeat.read_text())
+
+
+class JuliaDiagnosticTests(unittest.TestCase):
+    def test_colored_error_is_detected_and_reported(self):
+        text = "julia> broken()\r\n\x1b[91mERROR: \x1b[39mUndefVarError: missing\nStacktrace: test"
+        self.assertIn('UndefVarError: missing', record.julia_error(text))
+        self.assertNotIn('\x1b', record.julia_error(text))
+
+    def test_echoed_error_string_is_not_a_failure(self):
+        self.assertIsNone(record.julia_error('julia> \"ERROR:\"\n\"ERROR:\"\n'))

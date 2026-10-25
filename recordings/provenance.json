@@ -15,12 +15,12 @@
   },
   "helloworld": {
     "kind": "validated",
-    "input_sha256": "8ac841ee472151b7dfc8020b22e15ac05aad07e2c0c2b9ecb416100636036085",
-    "cast_sha256": "6403dc67b62d7c3ac13671c8d5d80a62ea5e0db306380117ed51ebabd88f0419",
+    "input_sha256": "567dbab389613dd1fbd07ddf7cae22e33a9c8aaec280f20705cbbbb8d5450869",
+    "cast_sha256": "bcae179536f33e2bd959304d138116b6b3e08eb3a221fe7bf58c60917d2a51f9",
     "julia": "julia version 1.13.2",
     "asciinema": "asciinema 2.4.0",
-    "recorded_at": "2026-10-25T14:35:25.775427+00:00",
-    "source_commit": "3928bc3dfe4be99bc55f2a73e9841d93f36e5965",
+    "recorded_at": "2026-10-25T15:02:06.802237+00:00",
+    "source_commit": "32ef2ba5b5e976eb0f3af12af5f423a6dccad069",
     "replay_source": "# Immutable Replay source revision used by recording CI.\nurl = \"https://github.com/AtelierArith/Replay.jl.git\"\nrev = \"e50fe5c421d8e649bc02a36a5e365fd930e56f90\"\n",
     "manifests": {
       "gallery-Manifest.toml": "6580b6d839c1452b224490b29cad37a740b1ce8bd2e65d6fe36eac6350c2bb09",
@@ -112,11 +112,18 @@
     "cast_sha256": "e0283d33ad27785e9204c70f47b0715aedb5dc4ef10919a37e70b16a550672fb"
   },
   "unicodeplots_animated": {
-    "kind": "historical",
-    "source_repository": "AtelierArith/Replay.jl",
-    "source_commit": "0acdd8e5576bbadc50503c4973af96fb13987e34",
-    "source_path": "dev/assets/unicodeplots_animated.cast",
-    "cast_sha256": "b288e346470385e37b7ca0f9664d11daebcc05a02a9c04fc6d6f31929277c082"
+    "kind": "validated",
+    "input_sha256": "22770837f681b3224a7d297703a4a3560ff855bda4c475094aba603525de6f63",
+    "cast_sha256": "9f60784f23dfe94f78e6e5b6950034f04139dfd43518d4bf475b8baed6d47f92",
+    "julia": "julia version 1.13.2",
+    "asciinema": "asciinema 2.4.0",
+    "recorded_at": "2026-10-25T15:02:28.111353+00:00",
+    "source_commit": "32ef2ba5b5e976eb0f3af12af5f423a6dccad069",
+    "replay_source": "# Immutable Replay source revision used by recording CI.\nurl = \"https://github.com/AtelierArith/Replay.jl.git\"\nrev = \"e50fe5c421d8e649bc02a36a5e365fd930e56f90\"\n",
+    "manifests": {
+      "gallery-Manifest.toml": "6580b6d839c1452b224490b29cad37a740b1ce8bd2e65d6fe36eac6350c2bb09",
+      "unicodeplots_animated-Manifest.toml": "985a1312a8c9ad23b9f979e8b495b65eafd9ad01e983958cf33135176a7dcaaf"
+    }
   },
   "use_ghostwriter": {
     "kind": "historical",
@@ -127,12 +134,12 @@
   },
   "numbered_prompt": {
     "kind": "validated",
-    "input_sha256": "f3c832703cfb35465c72d3ba419409e11312da597eb7a14f565a52ee6c653cec",
-    "cast_sha256": "e9bc3ddc1243c09b1b5cfecb2631c9c7bc591227ec31cdc2121603b893b02ce0",
+    "input_sha256": "645d71091a105bab7a05fe8c2bf8cc6ef9859a0fd5418389c98d910776d4d9b5",
+    "cast_sha256": "a086058ca07b321de211afc8f704110fac804af397824ff1f1f9bd5721a9f303",
     "julia": "julia version 1.13.2",
     "asciinema": "asciinema 2.4.0",
-    "recorded_at": "2026-10-25T14:35:15.834118+00:00",
-    "source_commit": "3928bc3dfe4be99bc55f2a73e9841d93f36e5965",
+    "recorded_at": "2026-10-25T15:01:56.708118+00:00",
+    "source_commit": "32ef2ba5b5e976eb0f3af12af5f423a6dccad069",
     "replay_source": "# Immutable Replay source revision used by recording CI.\nurl = \"https://github.com/AtelierArith/Replay.jl.git\"\nrev = \"e50fe5c421d8e649bc02a36a5e365fd930e56f90\"\n",
     "manifests": {
       "gallery-Manifest.toml": "6580b6d839c1452b224490b29cad37a740b1ce8bd2e65d6fe36eac6350c2bb09",
@@ -141,12 +148,12 @@
   },
   "interactive_menu": {
     "kind": "validated",
-    "input_sha256": "7e694e555a08118e073203a7d8083c5bce51bb5e22ffd0e102d281302ed95797",
-    "cast_sha256": "e4f8c58ab44e74a516407cafcb1054098cf5dcbfeb991ccab8718cfd9eb1433c",
+    "input_sha256": "9bd464b992540db430bdd3e852467ecdfe98d478abcd8cf3d04e59633ca97cba",
+    "cast_sha256": "d4508df3fe2611fddcd9f86d31c551cbb22d87a25a3a58d98a1460c260345c7a",
     "julia": "julia version 1.13.2",
     "asciinema": "asciinema 2.4.0",
-    "recorded_at": "2026-10-25T14:35:33.009970+00:00",
-    "source_commit": "3928bc3dfe4be99bc55f2a73e9841d93f36e5965",
+    "recorded_at": "2026-10-25T15:02:13.745851+00:00",
+    "source_commit": "32ef2ba5b5e976eb0f3af12af5f423a6dccad069",
     "replay_source": "# Immutable Replay source revision used by recording CI.\nurl = \"https://github.com/AtelierArith/Replay.jl.git\"\nrev = \"e50fe5c421d8e649bc02a36a5e365fd930e56f90\"\n",
     "manifests": {
       "gallery-Manifest.toml": "6580b6d839c1452b224490b29cad37a740b1ce8bd2e65d6fe36eac6350c2bb09",
