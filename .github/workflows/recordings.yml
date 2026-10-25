@@ -1,0 +1,87 @@
+name: Validate recordings
+on:
+  pull_request:
+    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
+  push:
+    branches: [main]
+    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
+  workflow_dispatch:
+    inputs:
+      example:
+        description: 'Example name, or all (record artifacts; never auto-commit)'
+        default: all
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: recordings-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      any: ${{ steps.select.outputs.any }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: select
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT: ${{ github.event_name }}
+          EXAMPLE: ${{ inputs.example }}
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, sys
+          sys.path.insert(0, 'scripts')
+          from gallery import catalog, selected
+          eligible = sorted(e['name'] for e in catalog() if e['record'])
+          if os.environ['EVENT'] == 'workflow_dispatch':
+              request = os.environ['EXAMPLE']
+              if request != 'all' and request not in eligible:
+                  raise SystemExit('Unknown or non-recordable example')
+              names = eligible if request == 'all' else [request]
+          elif not os.environ['BASE'] or set(os.environ['BASE']) == {'0'}:
+              names = eligible
+          else:
+              changed = subprocess.check_output(['git', 'diff', '--name-only', os.environ['BASE'], os.environ['HEAD']], text=True).splitlines()
+              names = selected(changed)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print('matrix=' + json.dumps({'example': names}), file=output)
+              print('any=' + str(bool(names)).lower(), file=output)
+          print('Selected examples:', names)
+          PY
+  record:
+    needs: select
+    if: needs.select.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v3
+        with:
+          delete-old-caches: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install asciinema==2.4.0
+      - run: julia --startup-file=no --project=. scripts/setup.jl
+      - run: julia --startup-file=no tests/recordings.jl
+      - name: Warm up, record and validate
+        env:
+          EXAMPLE: ${{ matrix.example }}
+        run: python scripts/record.py "$EXAMPLE"
+      - uses: actions/upload-artifact@v6
+        with:
+          name: recording-${{ matrix.example }}
+          path: artifacts
+          if-no-files-found: error

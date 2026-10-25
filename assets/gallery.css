@@ -1,0 +1,7 @@
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; line-height: 1.55; }
+main { max-width: 1000px; margin: auto; padding: 2rem 1rem; }
+pre { padding: 1rem; overflow-x: auto; background: light-dark(#f2f4f8, #1d2433); border-radius: .5rem; }
+section { margin: 3rem 0; scroll-margin-top: 1rem; }
+.status { border-left: .25rem solid #b78324; padding-left: .75rem; }
+nav ul { columns: 2; }
+@media (max-width: 600px) { nav ul { columns: 1; } }
