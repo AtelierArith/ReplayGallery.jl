@@ -75,12 +75,40 @@ def julia_error(text):
     return plain[match.start():match.start() + 5000] if match else None
 
 
+def pinned_julia_version(root=ROOT):
+    """The single Julia version expected for every recording."""
+    return (root / 'julia-version').read_text().strip()
+
+
+def julia_version(julia='julia'):
+    """Return the exact Julia version reported by the executable."""
+    output = run([julia, '--version'], capture=True).strip()
+    match = re.search(r'\b(\d+\.\d+\.\d+)\b', output)
+    if match is None:
+        raise ValueError(f'Could not parse Julia version from: {output!r}')
+    return match.group(1)
+
+
+def check_julia_version(julia='julia', root=ROOT):
+    """Reject a recording environment that differs from the pinned version."""
+    expected = pinned_julia_version(root)
+    actual = julia_version(julia)
+    if actual != expected:
+        raise ValueError(
+            f'Julia {actual} is selected, but {root / "julia-version"} pins {expected}. '
+            f'Install that version or run with --julia pointing at it; mixed versions '
+            f'make recordings incomparable.'
+        )
+    return expected
+
+
 def record(name, output, julia='julia', timeout=900):
     entry = next((e for e in catalog() if e['name'] == name), None)
     if entry is None or not entry['record']:
         raise ValueError(f'Not a recordable example: {name}')
     if not (ROOT / 'Manifest.toml').exists():
         raise ValueError('Run julia --project=. scripts/setup.jl first')
+    check_julia_version(julia)
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     identity = fingerprint(name)

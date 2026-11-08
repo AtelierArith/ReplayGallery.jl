@@ -18,7 +18,7 @@ class GalleryTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         for name in ['examples', 'assets', 'recordings', 'scripts']:
             shutil.copytree(gallery.ROOT / name, self.root / name)
-        for name in ['Project.toml', 'examples.json', 'replay-source.toml']:
+        for name in ['Project.toml', 'examples.json', 'replay-source.toml', 'julia-version']:
             shutil.copyfile(gallery.ROOT / name, self.root / name)
 
     def tearDown(self):
@@ -35,6 +35,7 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(gallery.selected(['examples/sixel/app.jl'], self.root), [])
         self.assertEqual(len(gallery.selected(['scripts/record.py'], self.root)), 19)
         self.assertEqual(len(gallery.selected(['replay-source.toml'], self.root)), 19)
+        self.assertEqual(len(gallery.selected(['julia-version'], self.root)), 19)
         self.assertEqual(len(gallery.selected(['tests/recordings.jl'], self.root)), 19)
 
     def test_input_identity(self):
@@ -67,6 +68,10 @@ class GalleryTests(unittest.TestCase):
             missing.unlink()
         script = self.root / 'examples/helloworld/app.jl'
         script.write_text('println("<script>alert(1)</script>")')
+        provenance_path = self.root / 'recordings/provenance.json'
+        provenance = json.loads(provenance_path.read_text())
+        provenance['helloworld']['kind'] = 'historical'
+        provenance_path.write_text(json.dumps(provenance))
         output = gallery.build(self.root)
         html = (output / 'index.html').read_text()
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', html)
@@ -82,6 +87,18 @@ class GalleryTests(unittest.TestCase):
         path.write_text(json.dumps(provenance))
         output = gallery.build(self.root)
         self.assertIn('Stale recording', (output / 'index.html').read_text())
+
+    def test_mixed_validated_julia_versions_fail(self):
+        path = self.root / 'recordings/provenance.json'
+        provenance = json.loads(path.read_text())
+        provenance['helloworld']['julia'] = 'julia version 1.10.12'
+        path.write_text(json.dumps(provenance))
+        with self.assertRaisesRegex(ValueError, 'pinned'):
+            gallery.validate(self.root)
+
+    def test_pinned_version_is_single_source(self):
+        (self.root / 'julia-version').write_text('1.13.3\n')
+        self.assertEqual(gallery.pinned_julia_version(self.root), '1.13.3')
 
     def test_describe_reports_status_and_source(self):
         entries = {e['name']: e for e in gallery.describe(self.root)}
@@ -123,7 +140,7 @@ class RecorderTests(unittest.TestCase):
             old.write_text('previous validated recording')
             entry = {'name': 'demo', 'record': True, 'options': []}
             # Simulate asciinema returning success without its child finishing.
-            with patch.object(record, 'ROOT', root), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'run', return_value=''):
+            with patch.object(record, 'ROOT', root), patch.object(record, 'check_julia_version', return_value='1.13.3'), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'run', return_value=''):
                 with self.assertRaisesRegex(RuntimeError, 'did not finish'):
                     record.record('demo', output)
             self.assertEqual(old.read_text(), 'previous validated recording')
@@ -140,7 +157,7 @@ class RecorderTests(unittest.TestCase):
             old = output / 'demo.cast'
             old.write_text('previous validated recording')
             entry = {'name': 'demo', 'record': True, 'options': []}
-            with patch.object(record, 'ROOT', root), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'run', return_value='ERROR: failed'):
+            with patch.object(record, 'ROOT', root), patch.object(record, 'check_julia_version', return_value='1.13.3'), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'run', return_value='ERROR: failed'):
                 with self.assertRaisesRegex(RuntimeError, 'warmup'):
                     record.record('demo', output)
             self.assertEqual(old.read_text(), 'previous validated recording')
@@ -161,7 +178,7 @@ class IsolationTests(unittest.TestCase):
                 self.assertFalse((staged / 'Manifest.toml').exists())
                 (staged / 'Project.toml').write_text('changed by package mode')
                 return 'ok'
-            with patch.object(record, 'ROOT', root), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'record_example', side_effect=simulated_record):
+            with patch.object(record, 'ROOT', root), patch.object(record, 'check_julia_version', return_value='1.13.3'), patch.object(record, 'catalog', return_value=[entry]), patch.object(record, 'fingerprint', return_value='test'), patch.object(record, 'record_example', side_effect=simulated_record):
                 self.assertEqual(record.record('demo', root / 'artifacts'), 'ok')
             self.assertEqual((source / 'Project.toml').read_text(), '# original')
             self.assertEqual(list((root / 'artifacts').iterdir()), [])
@@ -189,3 +206,18 @@ class JuliaDiagnosticTests(unittest.TestCase):
 
     def test_echoed_error_string_is_not_a_failure(self):
         self.assertIsNone(record.julia_error('julia> \"ERROR:\"\n\"ERROR:\"\n'))
+
+    def test_pinned_julia_version_accepts_exact_match(self):
+        with patch.object(record, 'pinned_julia_version', return_value='1.13.3'), \
+             patch.object(record, 'julia_version', return_value='1.13.3'):
+            self.assertEqual(record.check_julia_version(), '1.13.3')
+
+    def test_pinned_julia_version_rejects_mismatch(self):
+        with patch.object(record, 'pinned_julia_version', return_value='1.13.3'), \
+             patch.object(record, 'julia_version', return_value='1.10.12'):
+            with self.assertRaisesRegex(ValueError, 'mixed versions'):
+                record.check_julia_version()
+
+    def test_julia_version_reports_exact_patch(self):
+        with patch.object(record, 'run', return_value='julia version 1.13.3\n'):
+            self.assertEqual(record.julia_version(), '1.13.3')
