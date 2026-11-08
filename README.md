@@ -46,7 +46,6 @@ python -m http.server --directory docs/build/1 8001
 The **Documentation** workflow builds and deploys on every push to `main`, and
 leaves a preview under `previews/PR<n>/` for pull requests from this repository.
 
-
 ## Record an example
 
 The recorder uses POSIX PTYs/process management (Linux/macOS; use WSL on Windows).
