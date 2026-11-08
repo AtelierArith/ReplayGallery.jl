@@ -16,3 +16,13 @@ finally
     # New Julia versions persist [sources]; keep local paths out of tracked inputs.
     write(project, original)
 end
+# Julia 1.13 hashes [sources], which Pkg.add/develop adds above. The dependency
+# graph is already resolved; only that metadata was removed. Pkg.resolve() would
+# add [sources] back, so refresh the hash against the restored project instead.
+env = Pkg.Types.EnvCache(project)
+env.manifest.other["project_hash"] = if applicable(Pkg.Types.project_resolve_hash, env, VERSION)
+    Pkg.Types.project_resolve_hash(env, VERSION)
+else
+    Pkg.Types.project_resolve_hash(env.project)
+end
+Pkg.Types.write_manifest(env)

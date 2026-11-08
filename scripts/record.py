@@ -134,6 +134,8 @@ def record_example(entry, example_directory, output, julia, timeout, identity):
     warmup = run(command, timeout=timeout, cwd=example_directory, env=env, capture=True)
     if error := julia_error(warmup):
         raise RuntimeError('Julia reported an error during warmup:\n' + error)
+    if 'The project dependencies or compat requirements have changed' in warmup:
+        raise RuntimeError('Stale Manifest.toml; rerun julia --project=. scripts/setup.jl')
     # Write atomically: failed/repeated recordings must not overwrite valid output.
     with tempfile.TemporaryDirectory(prefix=name + '-', dir=output) as temporary:
         cast = Path(temporary) / (name + '.cast')
@@ -148,6 +150,8 @@ def record_example(entry, example_directory, output, julia, timeout, identity):
         plain = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
         if error := julia_error(plain):
             raise RuntimeError('Julia reported an error in the recording:\n' + error)
+        if 'The project dependencies or compat requirements have changed' in plain:
+            raise RuntimeError('Stale Manifest.toml warning in recording; rerun scripts/setup.jl')
         if name == 'numbered_prompt' and not all(marker in plain for marker in ['In [1]:', 'In [2]:', 'Out[1]']):
             raise RuntimeError('Numbered prompt/output markers are absent')
         if name == 'interactive_menu' and not all(marker in plain for marker in ['choice = 2', 'cancelled = -1', 'again = 1']):
