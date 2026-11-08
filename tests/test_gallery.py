@@ -128,6 +128,15 @@ if __name__ == '__main__':
     unittest.main()
 
 class RecorderTests(unittest.TestCase):
+    def test_stale_manifest_stops_before_recording(self):
+        with tempfile.TemporaryDirectory() as directory:
+            entry = {'name': 'demo', 'options': []}
+            warning = 'Warning: The project dependencies or compat requirements have changed'
+            with patch.object(record, 'run', return_value=warning) as run:
+                with self.assertRaisesRegex(RuntimeError, 'Stale Manifest.toml'):
+                    record.record_example(entry, Path(directory), Path(directory), 'julia', 30, 'test')
+            self.assertEqual(run.call_count, 1)
+
     def test_failed_recording_preserves_previous_cast(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
