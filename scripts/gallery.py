@@ -11,6 +11,11 @@ import shutil
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def pinned_julia_version(root=ROOT):
+    """The single Julia version expected for every recording."""
+    return (root / "julia-version").read_text().strip()
+
+
 def catalog(root=ROOT):
     entries = json.loads((root / "examples.json").read_text())
     names = [e["name"] for e in entries]
@@ -27,7 +32,8 @@ def catalog(root=ROOT):
 
 def fingerprint(name, root=ROOT):
     """Input identity, not proof of successful execution or a cache hit."""
-    paths = [root / "Project.toml", root / "examples.json", root / "replay-source.toml"]
+    paths = [root / "Project.toml", root / "examples.json", root / "replay-source.toml",
+             root / "julia-version"]
     paths += sorted((root / "scripts").glob("*.py"))
     paths += sorted((root / "scripts").glob("*.jl"))
     paths += sorted(p for p in (root / "examples" / name).rglob("*")
@@ -66,12 +72,18 @@ def validate(root=ROOT):
         if hashlib.sha256((root / "assets" / name).read_bytes()).hexdigest() != expected:
             raise ValueError(f"Vendored asset hash mismatch: {name}")
     provenance = json.loads((root / "recordings/provenance.json").read_text())
+    expected_julia = "julia version " + pinned_julia_version(root)
     for path in (root / "recordings").glob("*.cast"):
         check_cast(path)
         entry = provenance[path.stem]
         if hashlib.sha256(path.read_bytes()).hexdigest() != entry["cast_sha256"]:
             raise ValueError(f"Recording hash mismatch: {path.name}")
         if entry.get("kind") == "validated":
+            if entry.get("julia") != expected_julia:
+                raise ValueError(
+                    f"Recording {path.name} was made with {entry.get('julia')!r}, "
+                    f"not the pinned {expected_julia!r}"
+                )
             for filename, expected in entry["manifests"].items():
                 if not re.fullmatch(r'[a-z][a-z0-9_-]*-Manifest\.toml', filename):
                     raise ValueError("Unsafe manifest filename")
@@ -85,7 +97,8 @@ def selected(changed, root=ROOT):
     entries = catalog(root)
     eligible = {e["name"] for e in entries if e["record"]}
     shared = ("scripts/", "tests/recordings.jl", ".github/workflows/recordings.yml")
-    if any(p in ("Project.toml", "examples.json", "replay-source.toml") or p.startswith(shared) for p in changed):
+    if any(p in ("Project.toml", "examples.json", "replay-source.toml", "julia-version")
+           or p.startswith(shared) for p in changed):
         return sorted(eligible)
     return sorted({p.split("/")[1] for p in changed
                    if p.startswith("examples/") and len(p.split("/")) > 2} & eligible)

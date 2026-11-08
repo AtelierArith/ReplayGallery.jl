@@ -14,7 +14,8 @@ were migrated from Replay.jl, retaining their license. SIXEL examples require a
 SIXEL-capable terminal and cannot be rendered by asciinema-player.
 
 ```sh
-# From this repository's root; Julia stable or LTS, Python 3.11+.
+# From this repository's root; the pinned Julia version is in `julia-version`,
+# and Python 3.11+ is required.
 julia --startup-file=no --project=. scripts/setup.jl
 julia --startup-file=no --project=. examples/helloworld/app.jl
 
@@ -58,7 +59,9 @@ asciinema play artifacts/helloworld.cast
 ```
 
 `setup.jl` pins Replay to the commit in [replay-source.toml](replay-source.toml).
-A local `REPLAY_PATH` checkout override is available for development; such receipts
+The Julia runtime is pinned in [julia-version](julia-version); `record.py` refuses
+to record with any other Julia version so examples stay comparable. A local
+`REPLAY_PATH` checkout override is available for development; such receipts
 are labeled `development` and cannot be imported as validated recordings.
 The recorder copies an example to a temporary working environment (excluding local
 manifests/Conda state), warms up packages first, then records with fixed terminal
@@ -91,7 +94,9 @@ See [video export](docs/video.md) for an actual GIF/MP4 file rather than a cast.
   validates all added recordable examples, with at most four jobs in parallel.
 - Manual **Validate recordings** dispatch accepts one name or `all`. Julia's
   package/artifact cache speeds installation but is never evidence of successful
-  execution. Every selected example is warmed up and recorded again.
+  execution. Every selected example is warmed up and recorded again. The cache is
+  keyed by Julia version; it does not select the runtime. [`julia-version`](julia-version)
+  does that, so changing it re-records every example.
 - Each recording artifact contains a cast, a receipt with source-input checksum,
   Julia/asciinema versions and checkout commit, and the exact resolved root/example
   `Manifest.toml` files. Restore those manifests with the recorded Julia version
@@ -129,9 +134,11 @@ There is no unpinned “latest” download in docs builds. To update it:
    cast. Submit these asset changes in a reviewed PR.
 
 Update the immutable Replay commit in `replay-source.toml` in a PR. Such a change
-selects all recordings. The gallery recording runtime uses Julia's stable `1`
-selector; Replay's own test suite, not this example gallery, covers both `1` and
-`lts`. Browser/site-only changes stay independent of both Julia test matrices.
+selects all recordings. The gallery recording runtime is the exact version in
+`julia-version` (currently 1.13.3), installed by `julia-actions/setup-julia`; it is
+never the floating `1` selector. Replay's own test suite, not this example gallery,
+covers both `1` and `lts`. Browser/site-only changes stay independent of both Julia
+test matrices.
 
 The migrated Julia helper in `scripts/ensure_recording.jl` retains regression tests
 (`julia tests/recordings.jl`) for missing/existing/forced recordings. The new Python

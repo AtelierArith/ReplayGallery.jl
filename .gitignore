@@ -1,5 +1,6 @@
 /build/
 /artifacts/
+/artifacts-*/
 Manifest.toml
 **/.CondaPkg/
 __pycache__/

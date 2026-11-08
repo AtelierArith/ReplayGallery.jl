@@ -8,9 +8,13 @@ for the full workflow and safety notes; this page is a short version.
 
 ## Prerequisites
 
-- Julia stable or LTS, and Python 3.11+.
+- The exact Julia version in `julia-version` (currently 1.13.3), and Python 3.11+.
 - `asciinema` 2.4.0 (`python -m pip install asciinema==2.4.0`).
 - A POSIX PTY environment (Linux or macOS; use WSL on Windows).
+
+`record.py` checks `julia --version` against `julia-version` before doing any work,
+so a locally installed LTS or a newer stable release cannot silently produce a
+recording with a different runtime.
 
 ## Record an example
 

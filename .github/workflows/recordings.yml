@@ -1,10 +1,10 @@
 name: Validate recordings
 on:
   pull_request:
-    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
+    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'julia-version', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
   push:
     branches: [main]
-    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
+    paths: ['examples/**', 'examples.json', 'Project.toml', 'replay-source.toml', 'julia-version', 'scripts/**', 'tests/recordings.jl', '.github/workflows/recordings.yml']
   workflow_dispatch:
     inputs:
       example:
@@ -64,9 +64,12 @@ jobs:
       matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
+      - name: Read pinned Julia version
+        id: julia
+        run: echo "version=$(cat julia-version)" >> "$GITHUB_OUTPUT"
       - uses: julia-actions/setup-julia@v3
         with:
-          version: '1'
+          version: ${{ steps.julia.outputs.version }}
       - uses: julia-actions/cache@v3
         with:
           delete-old-caches: false
