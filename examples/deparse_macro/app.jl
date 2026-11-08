@@ -8,9 +8,7 @@ i3 = @deparse begin
 end
 i4 = @deparse @show dot(x, A, x)
 i5 = @deparse function f(x)
-    @comment This is a comment
     if x > 0
-        @comment x is larger than 0
         @info "x is larger than 0"
     end
     @info "compute 2x + 2"

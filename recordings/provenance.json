@@ -1,10 +1,17 @@
 {
   "deparse_macro": {
-    "kind": "historical",
-    "source_repository": "AtelierArith/Replay.jl",
-    "source_commit": "0acdd8e5576bbadc50503c4973af96fb13987e34",
-    "source_path": "dev/assets/deparse_macro.cast",
-    "cast_sha256": "1491571426b615637532967daaf81617768abeb24c0209f72b0e077be4d30d1a"
+    "kind": "validated",
+    "input_sha256": "5c60bacbee8f744043cb0724fd8fb0b9a4e7e444ee1b449a44cf7c8126861b65",
+    "cast_sha256": "4f5df744b887bfc18e3783797537ee43893552c8d3c2e6c47033e37019a6ad2a",
+    "julia": "julia version 1.13.3",
+    "asciinema": "asciinema 2.4.0",
+    "recorded_at": "2026-11-08T12:11:06.393179+00:00",
+    "source_commit": "d4670f260b555857f71d2dac5a71e46cd1014727",
+    "replay_source": "# Immutable Replay source revision used by recording CI.\nurl = \"https://github.com/AtelierArith/Replay.jl.git\"\nrev = \"7e1c7383a285acb3870cf96f5ef6915de6c861c0\"\n",
+    "manifests": {
+      "gallery-Manifest.toml": "37f47a5e4f270d0869c5b44f42cd7bddf19ca5563ba4ba9d85058abb487df246",
+      "deparse_macro-Manifest.toml": "37f47a5e4f270d0869c5b44f42cd7bddf19ca5563ba4ba9d85058abb487df246"
+    }
   },
   "disable_color": {
     "kind": "historical",
