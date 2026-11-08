@@ -26,8 +26,26 @@ python -m http.server --directory build 8000
 
 Open http://localhost:8000 (rather than opening the HTML as a file: the player
 loads recordings using HTTP). The **Static gallery** CI artifact `gallery-site`
-contains this same self-contained site. This repository does not automatically
-publish a website or change GitHub Pages settings.
+contains this same self-contained site.
+
+## Documentation site
+
+The browsable gallery is published with
+[DocumenterVitepress](https://luxdl.github.io/DocumenterVitepress.jl/stable/) to
+<https://atelierarith.github.io/ReplayGallery.jl/> (the `dev` section, built from
+`main`). Example pages are generated from `examples.json`, the sources under
+`examples/`, and `recordings/`, so the catalog stays the single source of truth.
+The player files are copied from the vendored `assets/` at build time.
+
+```sh
+julia --project=docs -e 'using Pkg; Pkg.instantiate()'
+julia --project=docs docs/make.jl
+python -m http.server --directory docs/build/1 8001
+```
+
+The **Documentation** workflow builds and deploys on every push to `main`, and
+leaves a preview under `previews/PR<n>/` for pull requests from this repository.
+
 
 ## Record an example
 
@@ -65,6 +83,9 @@ See [video export](docs/video.md) for an actual GIF/MP4 file rather than a cast.
 - **Static gallery** validates the catalog, vendored player checksums, and cast
   checksums, runs Python unit tests, then builds HTML. It never installs Julia or
   runs examples, downloads CDN assets, or depends on previous workflow artifacts.
+- **Documentation** validates the same catalog, then builds the DocumenterVitepress
+  site and deploys it to GitHub Pages. It runs `gallery.py describe`, so catalog,
+  player and provenance checks apply to the published site too.
 - **Validate recordings** independently runs only changed recordable examples.
   Shared recorder, dependency/source pin, catalog, or workflow changes select all
   recordable examples. Documentation-only changes select none. Initial migration

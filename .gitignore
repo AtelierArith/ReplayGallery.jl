@@ -3,3 +3,11 @@
 Manifest.toml
 **/.CondaPkg/
 __pycache__/
+
+# DocumenterVitepress が生成するもの
+/docs/build/
+/docs/node_modules/
+/docs/package-lock.json
+/docs/src/index.md
+/docs/src/examples/
+/docs/src/video.md

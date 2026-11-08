@@ -83,6 +83,20 @@ class GalleryTests(unittest.TestCase):
         output = gallery.build(self.root)
         self.assertIn('Stale recording', (output / 'index.html').read_text())
 
+    def test_describe_reports_status_and_source(self):
+        entries = {e['name']: e for e in gallery.describe(self.root)}
+        self.assertEqual(set(entries), {e['name'] for e in gallery.catalog(self.root)})
+        self.assertEqual(entries['sixel']['status'], 'sixel')
+        self.assertFalse(entries['sixel']['cast'])
+        self.assertIn('replay(', entries['helloworld']['source'])
+        path = self.root / 'recordings/provenance.json'
+        provenance = json.loads(path.read_text())
+        provenance['helloworld'].update(kind='validated', input_sha256='outdated', manifests={})
+        path.write_text(json.dumps(provenance))
+        entries = {e['name']: e for e in gallery.describe(self.root)}
+        self.assertEqual(entries['helloworld']['status'], 'stale')
+        self.assertTrue(entries['helloworld']['cast'])
+
     def test_failed_command_propagates(self):
         with self.assertRaises(Exception):
             record.run([sys.executable, '-c', 'raise SystemExit(9)'], capture=True)

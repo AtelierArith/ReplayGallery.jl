@@ -91,6 +91,29 @@ def selected(changed, root=ROOT):
                    if p.startswith("examples/") and len(p.split("/")) > 2} & eligible)
 
 
+def status(entry, provenance, root=ROOT):
+    """Recording status code, shared by the static page and the docs build."""
+    name = entry["name"]
+    if not entry["record"]:
+        return "sixel"
+    if not (root / "recordings" / f"{name}.cast").exists():
+        return "missing"
+    meta = provenance[name]
+    if meta.get("kind") == "validated":
+        return "validated" if meta.get("input_sha256") == fingerprint(name, root) else "stale"
+    return "historical"
+
+
+def describe(root=ROOT):
+    """Catalog entries plus status, source text and cast availability, as JSON-ready data."""
+    entries, provenance = validate(root)
+    return [{**entry,
+             "status": status(entry, provenance, root),
+             "cast": (root / "recordings" / f"{entry['name']}.cast").exists(),
+             "source": (root / "examples" / entry["name"] / "app.jl").read_text()}
+            for entry in entries]
+
+
 def build(root=ROOT, output=None):
     entries, provenance = validate(root)
     output = output or root / "build"
@@ -118,20 +141,20 @@ def build(root=ROOT, output=None):
         parts.append(f'<p><a href="https://github.com/AtelierArith/ReplayGallery.jl/tree/main/examples/{name}">Source &amp; dependencies</a></p>')
         parts.append(f'<pre><code>{html.escape(source)}</code></pre>')
         parts.append(f'<pre>python scripts/record.py {name}</pre>')
-        path = root / "recordings" / f"{name}.cast"
-        if not entry["record"]:
+        code = status(entry, provenance, root)
+        if code == "sixel":
             parts.append('<p>SIXEL rendering is not supported by the browser player. Run this example in a SIXEL-capable terminal; it is not part of recording CI.</p>')
-        elif path.exists():
-            meta = provenance[name]
-            status = 'Historical recording migrated from Replay.jl (not revalidated against current dependencies).'
-            if meta.get('kind') == 'validated':
-                status = ('Validated recording for these source inputs.' if meta.get('input_sha256') == fingerprint(name, root)
-                          else 'Stale recording: source inputs have changed; rerun recording CI.')
-            parts.append(f'<p class="status">{status}</p><p><a href="recordings/{name}.cast">Download cast</a> · '
+        elif code == "missing":
+            parts.append('<p>No reviewed recording yet. Run the example or download the recording workflow artifact; missing output is not a validation pass.</p>')
+        else:
+            status_text = {
+                'validated': 'Validated recording for these source inputs.',
+                'stale': 'Stale recording: source inputs have changed; rerun recording CI.',
+                'historical': 'Historical recording migrated from Replay.jl (not revalidated against current dependencies).',
+            }[code]
+            parts.append(f'<p class="status">{status_text}</p><p><a href="recordings/{name}.cast">Download cast</a> · '
                          '<a href="recordings/provenance.json">Provenance</a></p>')
             parts.append(f'<div id="player-{name}"></div><script>AsciinemaPlayer.create("recordings/{name}.cast", document.getElementById("player-{name}"), {{preload: false}});</script>')
-        else:
-            parts.append('<p>No reviewed recording yet. Run the example or download the recording workflow artifact; missing output is not a validation pass.</p>')
         parts.append('</section>')
     parts.append('</main></html>')
     (output / "index.html").write_text('\n'.join(parts))
@@ -141,7 +164,7 @@ def build(root=ROOT, output=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['validate', 'build', 'select'])
+    parser.add_argument('command', choices=['validate', 'build', 'describe', 'select'])
     parser.add_argument('paths', nargs='*')
     args = parser.parse_args()
     if args.command == 'select':
@@ -149,5 +172,7 @@ if __name__ == '__main__':
     elif args.command == 'validate':
         validate()
         print('Catalog, player checksums and recording provenance valid.')
+    elif args.command == 'describe':
+        print(json.dumps(describe()))
     else:
         print(build())
